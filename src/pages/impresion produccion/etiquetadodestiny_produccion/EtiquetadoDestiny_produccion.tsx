@@ -135,6 +135,9 @@ const [resetKey, setResetKey] = useState(0);
   const [piezasFormatted, setPiezasFormatted] = useState(''); 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  //Nueva linea
+  const [inputValue, setInputValue] = useState<string>('');  // Estado para el valor del input
+
   useEffect(() => {
     Swal.fire({
       icon: 'info',
@@ -824,6 +827,7 @@ const handleShippingUnitsChange = (event: React.ChangeEvent<HTMLInputElement>) =
               getOptionLabel={(option) => option.area}
               renderInput={(params) => <TextField {...params} label="Área" fullWidth />}
           />
+          {/*
           <Autocomplete
               value={ordenes.find(o => o.id === selectedOrden)}
               onChange={(event, newValue) => setSelectedOrden(newValue?.id)}
@@ -831,6 +835,25 @@ const handleShippingUnitsChange = (event: React.ChangeEvent<HTMLInputElement>) =
               getOptionLabel={(option) => option.orden.toString() + " - " + option.claveProducto + " " + option.producto}
               renderInput={(params) => <TextField {...params} label="Orden" />}
           />
+          */}
+
+          <Autocomplete
+            value={ordenes.find(o => o.id === selectedOrden) || null}
+            onChange={(event, newValue) => setSelectedOrden(newValue?.id)}
+            options={ordenes}
+            getOptionLabel={(option) => `${option.orden.toString()} - ${option.claveProducto} ${option.producto}`}
+            renderInput={(params) => <TextField {...params} label="Orden" />}
+            inputValue={inputValue}  // Controla el valor de entrada
+            onInputChange={(event, newInputValue) => setInputValue(newInputValue)}  // Actualiza el valor del input
+            noOptionsText={
+              inputValue?.length === 5 ? (
+                <span style={{ color: 'red' }}>La Orden no encuentra una ruta de proceso</span>
+              ) : ""
+            }
+          />
+
+
+
           <Autocomplete
               value={filteredMaquinas.find(m => m.id === selectedMaquina)}
               onChange={(event, newValue) => setSelectedMaquina(newValue?.id)}

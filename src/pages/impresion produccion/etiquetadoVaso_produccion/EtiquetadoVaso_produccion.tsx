@@ -10,6 +10,7 @@ import { Autocomplete } from '@mui/material';
 import jsPDF from 'jspdf';
 import Swal from 'sweetalert2';
 import { styled } from '@mui/material/styles';
+import { createFilterOptions } from '@mui/material';
 
 interface Area {
   id: number;
@@ -105,6 +106,10 @@ const EtiquetadoVaso_produccion: React.FC = () => {
     { name: "Impresora 3", ip: "172.16.20.112" }
   ];
   
+  //Linea nueva................................................................................
+  const [inputValue, setInputValue] = useState<string>('');  // Estado para el valor del input
+  //...........................................................................................
+
 
   const handlePesoTarimaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   const value = parseFloat(event.target.value);
@@ -470,7 +475,8 @@ const handleConfirmEtiqueta = () => {
             getOptionLabel={(option) => option.area}
             renderInput={(params) => <TextField {...params} label="Área" fullWidth />}
           />
-
+          
+          {/* 
           <Autocomplete
             value={ordenes.find(o => o.id === selectedOrden)}
             onChange={(event, newValue) => setSelectedOrden(newValue?.id)}
@@ -478,6 +484,29 @@ const handleConfirmEtiqueta = () => {
             getOptionLabel={(option) => option.orden.toString() + " - " + option.claveProducto + " "+ option.producto}
             renderInput={(params) => <TextField {...params} label="Orden" />}
           />
+          */}
+
+<Autocomplete
+      value={ordenes.find(o => o.id === selectedOrden) || null}
+      onChange={(event, newValue) => setSelectedOrden(newValue?.id)}  // Actualiza el valor seleccionado
+      inputValue={inputValue}  // Controla el valor del input
+      onInputChange={(event, newInputValue) => setInputValue(newInputValue)}  // Actualiza el valor del input
+      options={ordenes}
+      getOptionLabel={(option) => `${option.orden} - ${option.claveProducto} ${option.producto}`}
+      filterOptions={createFilterOptions({
+        matchFrom: 'start',  // Filtra las opciones por el inicio de la cadena
+        stringify: (option) => `${option.orden} - ${option.claveProducto} ${option.producto}`,
+      })}
+      renderInput={(params) => <TextField {...params} label="Orden" />}
+      noOptionsText={
+        inputValue.length === 5 ? (  // Muestra el mensaje solo si tiene exactamente 5 caracteres
+          <span style={{ color: 'red' }}>La Orden no encuentra una ruta de proceso</span>
+        ) : ""
+      }  
+    />
+
+
+
           <Autocomplete
               value={filteredMaquinas.find(m => m.id === selectedMaquina)}
               onChange={(event, newValue) => setSelectedMaquina(newValue?.id)}

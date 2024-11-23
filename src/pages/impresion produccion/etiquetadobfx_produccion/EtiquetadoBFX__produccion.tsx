@@ -102,6 +102,9 @@ const EtiquetadoBFX_produccion: React.FC = () => {
     { name: "Impresora 3", ip: "172.16.20.112" }
   ];
   
+  //Linea nueva................................................................................
+  const [inputValue, setInputValue] = useState<string>('');  // Estado para el valor del input
+  //...........................................................................................
 
   const handlePesoTarimaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
@@ -486,6 +489,8 @@ const handleConfirmEtiqueta = () => {
                 getOptionLabel={(option) => option.area}
                 renderInput={(params) => <TextField {...params} label="Área" fullWidth />}
             />
+            
+            {/*
             <Autocomplete
                 key={`orden-${resetKey}`}
                 value={ordenes.find(o => o.id === selectedOrden) || null}
@@ -498,6 +503,37 @@ const handleConfirmEtiqueta = () => {
                 })}
                 renderInput={(params) => <TextField {...params} label="Orden" />}
             />
+            */}
+
+            {//Mensaje de Orden sin ruta...................................................................
+            }
+            <Autocomplete
+              key={`orden-${resetKey}`}
+              value={ordenes.find(o => o.id === selectedOrden) || null}
+              onChange={(event, newValue) => {
+                setSelectedOrden(newValue?.id || undefined);  // Actualiza el valor seleccionado
+              }}
+              inputValue={inputValue}  // Vínculo del input con el valor del estado
+              onInputChange={(event, newInputValue) => {
+                setInputValue(newInputValue);  // Actualiza el valor del input
+              }}
+              options={ordenes}
+              getOptionLabel={(option) => `${option.orden.toString()} - ${option.claveProducto} ${option.producto}`}
+              filterOptions={createFilterOptions({
+                matchFrom: 'start',
+                stringify: (option) => `${option.orden.toString()} - ${option.claveProducto} ${option.producto}`
+              })}
+              renderInput={(params) => <TextField {...params} label="Orden" />}
+              noOptionsText={
+                inputValue.length === 5 ? (  // Muestra el mensaje solo si tiene exactamente 5 caracteres
+                  <span style={{ color: 'red' }}>La Orden no encuentra una ruta de proceso</span>
+                ) : ""
+              }  
+            />
+
+            {//..........................................................................................
+            }
+
             <Autocomplete
                 key={`maquina-${resetKey}`}
                 value={filteredMaquinas.find(m => m.id === selectedMaquina) || null}
