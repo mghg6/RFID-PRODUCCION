@@ -105,9 +105,11 @@ const Etiquetado_HRSpinner: React.FC = () => {
   const [productDescription, setProductDescription] = useState<string>("");
   const [qpsPartNumber, setQpsPartNumber] = useState<string>("");
   const [qtyPerCase, setQtyPerCase] = useState<number | "">(""); // Cantidad por caja (permitimos "" para manejar un campo vacío)
-const [qtyPerPallet, setQtyPerPallet] = useState<number | "">(""); // Cantidad por pallet// Cantidad por pallet
+  const [qtyPerPallet, setQtyPerPallet] = useState<number | "">(""); // Cantidad por pallet// Cantidad por pallet
   const [wicket, setWicket] = useState<string>(""); 
   const [multipleValuesCode, setMultipleValuesCode] = useState<string>(""); // Estado para almacenar el código concatenado
+  const [shippingUnits, setShippingUnits] = useState<number | undefined>();
+
   // Aqui se asginan los nombres y las IP de las impresoras
   const printerOptions = [
     { name: "Impresora 1", ip: "172.16.20.56" },
@@ -115,6 +117,8 @@ const [qtyPerPallet, setQtyPerPallet] = useState<number | "">(""); // Cantidad p
     { name: "Impresora 3", ip: "172.16.20.112" }
   ];
   
+  const [inputValue, setInputValue] = useState("");
+
   // Se utiliza para cargar las areas y turnos en cuanto se inicializa el componente
   useEffect(() => {
     axios.get<Area[]>('http://172.16.10.31/api/Area').then(response => {
@@ -124,6 +128,11 @@ const [qtyPerPallet, setQtyPerPallet] = useState<number | "">(""); // Cantidad p
       setTurnos(response.data);
     });
   }, []);
+
+  useEffect(() => {
+        setPiezas(qtyPerPallet || 0);
+      }, [qtyPerPallet]);
+    
 
   // Efecto para cargar las órdenes y máquinas disponibles según el área seleccionada.
   useEffect(() => {
@@ -354,6 +363,7 @@ const generateBothCodes = async () => {
   setPesoTarima(undefined);
   setPiezas(0);
   setResetKey(prevKey => prevKey + 1);  // Forzar rerender al incrementar la key
+  setUnidad('');
 };
 
 // Resetea los valores globales del formulario.
@@ -370,6 +380,7 @@ const resetValores = () => {
   setPesoBruto(undefined);
   setPesoNeto(undefined);
   setPesoTarima(undefined);
+  setShippingUnits(undefined);
   setResetKey(prevKey => prevKey + 1);
 };
 
@@ -555,7 +566,8 @@ const handleConfirmEtiqueta = () => {
       qpsPartNumber: qpsPartNumber,
       lotCode: customerLot,
       qtyPerCase: qtyPerCase,
-      qtyPerPallet: qtyPerPallet
+      qtyPerPallet: qtyPerPallet,
+      shippingUnits: shippingUnits
       }
   };
 
@@ -585,6 +597,7 @@ const handleConfirmEtiqueta = () => {
       { name: 'RFID', value: data.rfid },
       { name: 'UOM', value: data.uom },
       { name: 'Fecha', value: data.fecha },
+      { name: 'Shipping Units', value: data.postExtraHRSpinner.shippingUnits },
   ];
 
   const emptyFields = requiredFields.filter(field => field.value === null || field.value === undefined || field.value === '');
@@ -597,7 +610,7 @@ const handleConfirmEtiqueta = () => {
       });
       return;
   }
-
+ 
   const url = `http://172.16.10.31/Printer/HRSpinnerPrinterIP?ip=${selectedPrinter.ip}`;
 
   axios.post(url, data)
@@ -651,7 +664,7 @@ const handleConfirmEtiqueta = () => {
                 getOptionLabel={(option) => option.area}
                 renderInput={(params) => <TextField {...params} label="Área" fullWidth />}
             />
-            <Autocomplete
+            {/* <Autocomplete
                 key={`orden-${resetKey}`}
                 value={ordenes.find(o => o.id === selectedOrden) || null}
                 onChange={(event, newValue) => setSelectedOrden(newValue?.id)}
@@ -662,7 +675,28 @@ const handleConfirmEtiqueta = () => {
                     stringify: (option) => option.orden.toString() + " - " + option.claveProducto + " " + option.producto
                 })}
                 renderInput={(params) => <TextField {...params} label="Orden" />}
-            />
+            /> */}
+            <Autocomplete
+              key={`orden-${resetKey}`}
+              value={ordenes.find(o => o.id === selectedOrden) || null}
+              onChange={(event, newValue) => setSelectedOrden(newValue?.id)}
+              options={ordenes}
+              getOptionLabel={(option) => option.orden.toString() + " - " + option.claveProducto + " " + option.producto}
+              filterOptions={createFilterOptions({
+                  matchFrom: 'start',
+                  stringify: (option) => option.orden.toString() + " - " + option.claveProducto + " " + option.producto
+              })}
+              renderInput={(params) => <TextField {...params} label="Orden" />}
+              noOptionsText={
+                  inputValue.length >= 5 ? (
+                      <span style={{ color: "red", padding: "8px" }}>La orden no encuentra una ruta de proceso</span>
+                  ) : (
+                      "No hay opciones"
+                  )
+              }
+              inputValue={inputValue}
+              onInputChange={(event, newValue) => setInputValue(newValue)}
+          />
             <Autocomplete
                 key={`maquina-${resetKey}`}
                 value={filteredMaquinas.find(m => m.id === selectedMaquina) || null}
@@ -723,7 +757,7 @@ const handleConfirmEtiqueta = () => {
               value={pesoTarima}
               onChange={handlePesoTarimaChange}
           />
-            <TextField
+            {/* <TextField
               key={`piezas-${resetKey}`}
               fullWidth
               label="#"
@@ -731,7 +765,18 @@ const handleConfirmEtiqueta = () => {
               type="number"
               value={piezas === undefined ? '' : piezas} // Muestra un valor vacío si `piezas` es `undefined`
               onChange={e => setPiezas(parseFloat(e.target.value))}
-            />
+            /> */}
+            <TextField
+             key={`shipping-units-${resetKey}`}
+             fullWidth
+             label="CANTIDAD DE CAJAS / Shipping Units"
+             variant="outlined"
+             type="number"
+             value={shippingUnits || ''}
+             onChange={e => setShippingUnits(Math.max(0, parseFloat(e.target.value) || 0))}
+             inputProps={{ min: 0 }}         
+           />
+
             <TextField
               label="Unidad"
               value={unidad} // Utiliza la variable de estado `unidad`
@@ -785,7 +830,7 @@ const handleConfirmEtiqueta = () => {
               variant="outlined"
             />
             <TextField
-              label="Cantidad por Caja"
+              label="PIEZAS POR CAJA / QTY PER CASE"
               type="number" // Solo permite números
               value={qtyPerCase} // Valor del estado
               onChange={(event) =>
@@ -794,7 +839,7 @@ const handleConfirmEtiqueta = () => {
               variant="outlined"
             />
             <TextField
-              label="Cantidad por Tarima"
+              label="TOTAL DE PIEZAS POR TARIMA"
               type="number" // Solo permite números
               value={qtyPerPallet} // Valor del estado
               onChange={(event) =>

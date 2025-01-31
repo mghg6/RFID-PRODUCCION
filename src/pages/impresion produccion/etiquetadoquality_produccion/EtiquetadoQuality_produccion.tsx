@@ -98,6 +98,7 @@ const EtiquetadoQuality_produccion: React.FC = () => {
   const [traceabilityCode, setTraceabilityCode] = useState('');
   const [qtyUOM, setQtyUOM] = useState<number | undefined>();
   const [totalQtyPallet, setTotalQtyPallet] = useState<number | ''>('');
+  const [shippingUnits, setShippingUnits] = useState<number | undefined>();
   const [customer, setCustomer] = useState<string>('');
   const [item, setItem] = useState<string>('');
   const [qpsItemNumber, setQpsItemNumber] = useState<string>('');
@@ -210,6 +211,10 @@ const EtiquetadoQuality_produccion: React.FC = () => {
       confirmButtonText: 'Entendido'
     });
   }, []);
+
+  useEffect(() => {
+    setPiezas(totalQtyPallet || 0);
+  }, [totalQtyPallet]);
 
   useEffect(() => {
     const generateTraceabilityCode = () => {
@@ -354,6 +359,7 @@ const resetValores = () => {
   setTraceabilityCode('');
   setQtyUOM(undefined);
   setTotalQtyPallet('');
+  setShippingUnits(undefined);
   setCustomer('');
   setItem('');
   setQpsItemNumber('');
@@ -373,6 +379,7 @@ const resetValores = () => {
     setUnidad('Cajas');
     setQtyUOM(undefined);
     setTotalQtyPallet('');
+    setShippingUnits(undefined);
     setResetKey(prevKey => prevKey + 1);  // Incrementa la key para forzar rerender
   };
 
@@ -558,7 +565,7 @@ const resetValores = () => {
             itemDescription: item, // Tomado directamente del estado
             itemNumber: qpsItemNumber,
             totalUnits: totalQtyPallet || 0,
-            shippingUnits: piezas || 0,
+            shippingUnits: shippingUnits || 0,
             inventoryLot: lot.toString(),
             customer: customer,
             traceability: traceabilityCode
@@ -688,7 +695,7 @@ const resetValores = () => {
             renderInput={(params) => <TextField {...params} label="Orden" />}
             noOptionsText={
               inputValue.length >= 5 ? (
-                <span style={{ color: "red", padding: "8px" }}>Orden sin ruta de proceso</span>
+                <span style={{ color: "red", padding: "8px" }}>La orden no encuentra una ruta de proceso</span>
               ) : (
                 "No hay opciones"
               )
@@ -756,7 +763,7 @@ const resetValores = () => {
               value={pesoTarima}
               onChange={handlePesoTarimaChange}
           />
-          <TextField
+          {/* <TextField
             key={`piezas-${resetKey}`}
             fullWidth
             label="#"
@@ -765,7 +772,19 @@ const resetValores = () => {
             value={piezas || ''}
             onChange={e => setPiezas(Math.max(0, parseFloat(e.target.value) || 0))}
             inputProps={{ min: 0 }}
+          /> */}
+
+          <TextField
+            key={`shipping-units-${resetKey}`}
+            fullWidth
+            label="CANTIDAD DE CAJAS / Shipping Units"
+            variant="outlined"
+            type="number"
+            value={shippingUnits || ''}
+            onChange={e => setShippingUnits(Math.max(0, parseFloat(e.target.value) || 0))}
+            inputProps={{ min: 0 }}
           />
+
           <TextField
               label="Unidad"
               value={unidad} // Utiliza la variable de estado `unidad`
@@ -806,7 +825,7 @@ const resetValores = () => {
             label="Lot"
             variant="outlined"
             type="number"
-            value={lot}
+            value={lot || ''}
             onChange={e => setLot(Math.max(0, parseFloat(e.target.value) || 0))}
             inputProps={{
               min: 0, // Asegura que no se puedan ingresar números negativos
@@ -816,7 +835,7 @@ const resetValores = () => {
           <TextField
             key={`qty-uom-${resetKey}`}
             fullWidth
-            label="Qty/UOM(Eaches)"
+            label="PIEZAS POR CAJA / Qty/UOM(Eaches)"
             variant="outlined"
             type="number"
             value={qtyUOM || ''}
@@ -826,14 +845,12 @@ const resetValores = () => {
           <TextField
             key={`total-qty-pallet-${resetKey}`}
             fullWidth
-            label="Total Qty/Pallet"
+            label="TOTAL DE PIEZAS / Total Qty/Pallet"
             variant="outlined"
             type="number"
             value={totalQtyPallet}
-            onChange={e => setTotalQtyPallet(Math.max(0, parseFloat(e.target.value) || 0))}
-            inputProps={{
-              min: 0 
-            }}
+            onChange={e =>setTotalQtyPallet(Math.max(0, parseFloat(e.target.value) || 0))}
+            inputProps={{min: 0}}
           />
           <TextField
               fullWidth

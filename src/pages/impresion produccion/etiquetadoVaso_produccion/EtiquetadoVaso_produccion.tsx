@@ -493,7 +493,7 @@ const handleConfirmEtiqueta = () => {
             renderInput={(params) => <TextField {...params} label="Orden" />}
             noOptionsText={
               inputValue.length >= 5 ? (
-                <span style={{ color: "red", padding: "8px" }}>Orden sin ruta de proceso</span>
+                <span style={{ color: "red", padding: "8px" }}>La orden no encuentra una ruta de proceso</span>
               ) : (
                 "No hay opciones"
               )

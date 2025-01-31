@@ -104,6 +104,7 @@ const Etiquetado_WandW: React.FC = () => {
   const [itemNumber, setItemNumber] = useState<string>('');
   const [inventoryLot, setInventoryLot] = useState<number>(0);
   const [totalUnits, setTotalUnits] = useState<number>(0);
+  const [shippingUnits, setShippingUnits] = useState<number | undefined>();
   const [traceabilityCode, setTraceabilityCode] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
@@ -111,6 +112,7 @@ const Etiquetado_WandW: React.FC = () => {
   const printerOptions = [
     { name: "Impresora 1", ip: "172.16.20.56" },
     { name: "Impresora 2", ip: "172.16.20.57" },
+    
   ];
   
   // Se utiliza para cargar las areas y turnos en cuanto se inicializa el componente
@@ -207,6 +209,9 @@ const Etiquetado_WandW: React.FC = () => {
     }
   }, [piezas]);
   
+   useEffect(() => {
+      setPiezas(totalUnits || 0);
+    }, [totalUnits]);
   
   // Abre el modal y genera la trazabilidad y el código RFID antes de abrirlo.
   const handleOpenModal = () => {
@@ -551,7 +556,8 @@ doc.save('rotulow&w.pdf');
         itemNumber: itemNumber,
         inventoryLot: inventoryLot,
         totalUnits: totalUnits,
-        traceabilityCode: traceabilityCode
+        traceabilityCode: traceabilityCode,
+        shippingUnits: shippingUnits
       },
   };
 
@@ -587,7 +593,8 @@ doc.save('rotulow&w.pdf');
       { name: 'Item Number', value: data.postExtrasWandW.itemNumber},
       { name: 'Inventory Lot', value: data.postExtrasWandW.inventoryLot },
       { name: 'Total Units', value: data.postExtrasWandW.totalUnits },
-      { name: 'Traceabilty Code', value: data.postExtrasWandW.traceabilityCode }
+      { name: 'Traceabilty Code', value: data.postExtrasWandW.traceabilityCode },
+      { name: 'Shipping Units', value: data.postExtrasWandW.shippingUnits },
   ];
 
   const emptyFields = requiredFields.filter(field => field.value === null || field.value === undefined || field.value === '');
@@ -685,7 +692,7 @@ doc.save('rotulow&w.pdf');
               renderInput={(params) => <TextField {...params} label="Orden" />}
               noOptionsText={
                 inputValue.length >= 5 ? (
-                  <span style={{ color: "red", padding: "8px" }}>Orden sin ruta de proceso</span>
+                  <span style={{ color: "red", padding: "8px" }}>La orden no encuentra una ruta de proceso</span>
                 ) : (
                   "No hay opciones"
                 )
@@ -753,7 +760,7 @@ doc.save('rotulow&w.pdf');
               value={pesoTarima}
               onChange={handlePesoTarimaChange}
           />
-            <TextField
+            {/* <TextField
               key={`piezas-${resetKey}`}
               fullWidth
               label="#"
@@ -761,7 +768,19 @@ doc.save('rotulow&w.pdf');
               type="number"
               value={piezas === undefined ? '' : piezas} // Muestra un valor vacío si `piezas` es `undefined`
               onChange={e => setPiezas(parseFloat(e.target.value))}
+            /> */}
+
+            <TextField
+              key={`shipping-units-${resetKey}`}
+              fullWidth
+              label="CANTIDAD DE CAJAS / Shipping Units"
+              variant="outlined"
+              type="number"
+              value={shippingUnits || ''}
+              onChange={e => setShippingUnits(Math.max(0, parseFloat(e.target.value) || 0))}
+              inputProps={{ min: 0 }}         
             />
+
             <TextField
               label="Unidad"
               value={unidad} // Utiliza la variable de estado `unidad`
@@ -810,7 +829,7 @@ doc.save('rotulow&w.pdf');
               onChange={e => setInventoryLot(parseInt(e.target.value))}
               InputProps={{ inputProps: { min: 0 } }} // Asegura que no se ingresen valores negativos
             />
-            <TextField
+            {/* <TextField
               key={`total-units-${resetKey}`}
               fullWidth
               label="Total Units"
@@ -820,7 +839,17 @@ doc.save('rotulow&w.pdf');
               onChange={e => setTotalUnits(parseInt(e.target.value))}
               InputProps={{ inputProps: { min: 0 }, 
               readOnly: true,}} // Asegura que no se ingresen valores negativos
-            />
+            /> */}
+            <TextField
+                        key={`total-qty-pallet-${resetKey}`}
+                        fullWidth
+                        label="TOTAL DE PIEZAS / Total Qty/Pallet"
+                        variant="outlined"
+                        type="number"
+                        value={totalUnits || ''}
+                        onChange={e =>setTotalUnits(Math.max(0, parseFloat(e.target.value) || 0))}
+                        inputProps={{min: 0}}
+                      />
             <TextField
             fullWidth
             label="Pallet ID"
