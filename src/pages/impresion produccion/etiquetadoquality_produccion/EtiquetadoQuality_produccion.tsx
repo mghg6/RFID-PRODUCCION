@@ -114,6 +114,12 @@ const EtiquetadoQuality_produccion: React.FC = () => {
     { name: "Impresora 2", ip: "172.16.20.57" },
   ];
 
+
+  //Linea nueva................................................................................
+  const [inputValue, setInputValue] = useState<string>('');  // Estado para el valor del input
+  //...........................................................................................
+
+
   const handlePesoTarimaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
     if (!isNaN(value) && value >= 0 && value <= 52) {
@@ -687,6 +693,7 @@ const resetValores = () => {
               getOptionLabel={(option) => option.area}
               renderInput={(params) => <TextField {...params} label="Área" fullWidth />}
           />
+          {/* 
           <Autocomplete
             value={ordenes.find(o => o.id === selectedOrden)}
             onChange={(event, newValue) => setSelectedOrden(newValue?.id)}
@@ -703,6 +710,26 @@ const resetValores = () => {
             inputValue={inputValue}
             onInputChange={(event, newValue) => setInputValue(newValue)}
           />
+          */}
+          
+          <Autocomplete
+            value={ordenes.find(o => o.id === selectedOrden) || null}
+            onChange={(event, newValue) => setSelectedOrden(newValue?.id)}  // Actualiza el valor seleccionado
+            options={ordenes}
+            getOptionLabel={(option) => `${option.orden} - ${option.claveProducto} ${option.producto}`}
+            inputValue={inputValue}  // Vínculo del input con el valor del estado
+            onInputChange={(event, newInputValue) => setInputValue(newInputValue)}  // Actualiza el valor del input
+            renderInput={(params) => <TextField {...params} label="Orden" />}
+            noOptionsText={
+              inputValue.length === 5 ? (  // Muestra el mensaje solo si tiene exactamente 5 caracteres
+                <span style={{ color: 'red' }}>La Orden no encuentra una ruta de proceso</span>
+              ) : ""
+            }
+          />
+
+          
+
+
           <Autocomplete
               value={filteredMaquinas.find(m => m.id === selectedMaquina)}
               onChange={(event, newValue) => setSelectedMaquina(newValue?.id)}
