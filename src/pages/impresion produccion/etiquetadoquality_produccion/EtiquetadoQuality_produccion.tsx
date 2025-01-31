@@ -107,7 +107,8 @@ const EtiquetadoQuality_produccion: React.FC = () => {
   const [claveUnidad, setClaveUnidad] = useState('Unidad');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPrinter, setSelectedPrinter] = useState<Printer | null>(null);
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>('');  
+ 
 
   const printerOptions = [
     { name: "Impresora 1", ip: "172.16.20.56" },
@@ -115,9 +116,8 @@ const EtiquetadoQuality_produccion: React.FC = () => {
   ];
 
 
-  //Linea nueva................................................................................
-  const [inputValue, setInputValue] = useState<string>('');  // Estado para el valor del input
-  //...........................................................................................
+  
+  
 
 
   const handlePesoTarimaChange = (event: React.ChangeEvent<HTMLInputElement>) => {

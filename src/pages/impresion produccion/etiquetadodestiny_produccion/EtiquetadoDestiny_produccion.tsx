@@ -136,8 +136,7 @@ const [resetKey, setResetKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
 
-  //Nueva linea
-  const [inputValue, setInputValue] = useState<string>('');  // Estado para el valor del input
+  
 
   useEffect(() => {
     Swal.fire({
